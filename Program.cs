@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 class Program
 {
@@ -29,13 +30,19 @@ class Program
 
     static int[] GenerateRandomList(int size)
     {
-        Random random = new Random();
-        int[] list = new int[size];
-        for(int i = 0; i < size; i++)
+        using(RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
         {
-            list[i] = random.Next(2000);
+            int[] list = new int[size];
+            byte[] buffer = new byte[sizeof(int)];
+            
+            for(int i = 0; i < size; i++)
+            {
+                rng.GetBytes(buffer);
+                int randomNumber = BitConverter.ToInt32(buffer, 0);
+                list[i] = Math.Abs(randomNumber % 2000);
+            }
+            return list;
         }
-        return list;
     }
 
     static void BubbleSort(int[] arr)
